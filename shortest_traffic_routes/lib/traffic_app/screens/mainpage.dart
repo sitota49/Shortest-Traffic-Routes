@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location/location.dart';
 
 import './zoombuttons_plugin_option.dart';
 import './current_location.dart';
 
 class MainPage extends StatefulWidget {
-  static const String route = 'polyline';
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -20,22 +18,15 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     mapController = MapController();
+
   }
-
-  // late Position _currentPosition;
-  String _currentAddress = '';
-
-  final startAddressController = TextEditingController();
+  // text controllers
   final destinationAddressController = TextEditingController();
-
-  final startAddressFocusNode = FocusNode();
   final desrinationAddressFocusNode = FocusNode();
 
-  String _startAddress = '';
+  // input holder
   String _destinationAddress = '';
-  String? _placeDistance;
 
-  Set<Marker> markers = {};
 
   Widget _textField({
     required TextEditingController controller,
@@ -86,9 +77,11 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
-    // var height = MediaQuery.of(context).size.height;
+     // var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     var markers = <Marker>[
       Marker(
@@ -113,7 +106,6 @@ class _MainPageState extends State<MainPage> {
       LatLng(9.032902334542289, 38.76340274677532),
       LatLng(9.040441993521377, 38.76207682720006),
     ];
-
     return Scaffold(
       // appBar: AppBar(title: Text('Traffic App')),
       floatingActionButton: CurrentLocation(mapController: mapController),
@@ -189,20 +181,9 @@ class _MainPageState extends State<MainPage> {
                                 });
                               }),
                           SizedBox(height: 10),
-                          Visibility(
-                            visible: _placeDistance == null ? false : true,
-                            child: Text(
-                              'DISTANCE: $_placeDistance km',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
                           SizedBox(height: 5),
                           ElevatedButton(
-                            onPressed: (_startAddress != '' &&
-                                    _destinationAddress != '')
+                            onPressed: ( _destinationAddress != '')
                                 ? () async {
                                     print("logic goes here");
                                   }
@@ -234,6 +215,7 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
+    
     );
   }
 }

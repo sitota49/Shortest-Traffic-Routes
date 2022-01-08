@@ -1,26 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:shortest_traffic_routes/traffic_app/repository/map_display_repository.dart';
 import 'package:shortest_traffic_routes/traffic_app/screens/mainpage.dart';
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shortest_traffic_routes/traffic_app/blocs/map_display_bloc.dart';
+import 'package:shortest_traffic_routes/traffic_app/blocs/map_display_event.dart';
+import 'package:shortest_traffic_routes/traffic_app/blocs/map_display_state.dart';
+import 'package:shortest_traffic_routes/traffic_app/data_provider/map_display_data_provider.dart';
+import 'package:http/http.dart' as http;
 
+class MyApp extends StatelessWidget {
+  static final httpClient = http.Client();
+
+  MyApp({Key? key}) : super(key: key);
+
+  final mapDisplayRepository = MapDisplayRepository(
+      dataProvider: MapDisplayDataProvider(
+    httpClient: MyApp.httpClient,
+  ));
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home:MainPage(),
-    );
+    return MultiBlocProvider(
+        providers: [
+          BlocProvider(
+              create: (context) =>
+                  MapDisplayBloc(mapDisplayRepository: mapDisplayRepository)
+                    ..add(
+                      MapDisplayLoad(),
+                    )),
+        ],
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: MainPage(),
+        ));
   }
 }

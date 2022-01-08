@@ -1,4 +1,3 @@
-//category model
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';

@@ -12,12 +12,12 @@ class MapDisplayLoading extends MapDisplayState {}
 
 class MapDisplayLoadSuccess extends MapDisplayState {
   final MapDisplay mapDisplay;
-
   const MapDisplayLoadSuccess(this.mapDisplay);
 
 
   @override
   List<Object> get props => [mapDisplay];
+
 }
 
 class MapDisplayLoadFailure extends MapDisplayState {
