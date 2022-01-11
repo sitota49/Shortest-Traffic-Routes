@@ -14,16 +14,14 @@ class MapDisplayLoadSuccess extends MapDisplayState {
   final MapDisplay mapDisplay;
   const MapDisplayLoadSuccess(this.mapDisplay);
 
-
   @override
   List<Object> get props => [mapDisplay];
-
 }
 
 class MapDisplayLoadFailure extends MapDisplayState {
- const  MapDisplayLoadFailure();
+  final String message;
+  const MapDisplayLoadFailure({required this.message});
 
   @override
   List<Object> get props => [];
 }
-

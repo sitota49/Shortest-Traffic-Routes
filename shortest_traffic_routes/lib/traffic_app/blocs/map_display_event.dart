@@ -8,7 +8,9 @@ abstract class MapDisplayEvent extends Equatable {
 }
 
 class MapDisplayLoad extends MapDisplayEvent {
-  
+
+  const MapDisplayLoad();
+
   @override
   List<Object> get props => [];
 }

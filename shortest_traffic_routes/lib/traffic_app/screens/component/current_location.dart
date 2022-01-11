@@ -75,7 +75,7 @@ class _CurrentLocationState extends State<CurrentLocation> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 40,
       height: 40,
       child: FloatingActionButton(
