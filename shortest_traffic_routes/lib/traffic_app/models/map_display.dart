@@ -12,7 +12,7 @@ class MapDisplay extends Equatable {
     this.startLocation,
     this.destinationLocation,
     this.bestRoute,
-    required this.markers,
+    this.markers,
   });
 
   final String? status;
@@ -20,7 +20,7 @@ class MapDisplay extends Equatable {
   final LatLng? centerLocation;
   final LatLng? startLocation;
   final LatLng? destinationLocation;
-  final List<Marker> markers;
+  final List<Marker>? markers;
   final List<LatLng>? bestRoute;
 
   @override

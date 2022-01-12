@@ -52,8 +52,8 @@ class MarkerBloc extends Bloc<MarkerEvent, MarkerState> {
         point: event.place,
         builder: (ctx) => const Icon(
               Icons.location_pin,
-              color: Colors.red,
-              size: 30,
+              color: Color.fromARGB(255, 98, 233, 102),
+              size: 45,
             ),
         anchorPos: AnchorPos.align(AnchorAlign.center));
 

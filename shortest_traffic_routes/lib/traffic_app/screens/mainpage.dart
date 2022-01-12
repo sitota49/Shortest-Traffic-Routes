@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:location/location.dart';
 import 'package:shortest_traffic_routes/traffic_app/blocs/map_display_bloc.dart';
 import 'package:shortest_traffic_routes/traffic_app/blocs/marker_bloc_event_state.dart';
+import 'package:shortest_traffic_routes/traffic_app/blocs/route_bloc/route_event.dart';
 import '../blocs/map_display_state.dart';
+import '../blocs/route_bloc/route_bloc.dart';
+import '../blocs/route_bloc/route_state.dart';
 import 'component/current_location.dart';
 import 'component/destination_search_bar.dart';
+import 'package:latlong2/latlong.dart';
 
+// ignore: must_be_immutable
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+  LatLng? destinationPlace;
+  MainPage({Key? key}) : super(key: key);
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -18,11 +25,13 @@ class _MainPageState extends State<MainPage> {
   late final MapController mapController;
   List<Marker> markers = [];
   bool routeShown = false;
+  late String? mode;
 
   @override
   Widget build(BuildContext context) {
     var destinationSearchBar = DestinationSearchBar(
       mapController: mapController,
+      main: super.widget,
     );
     return SafeArea(
       child: Scaffold(
@@ -40,6 +49,12 @@ class _MainPageState extends State<MainPage> {
           },
           child: Stack(
             children: <Widget>[
+              Positioned.fill(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(),
+                ),
+              ),
               BlocBuilder<MapDisplayBloc, MapDisplayState>(
                 builder: (context, state) {
                   if (state is MapDisplayLoading) {
@@ -54,27 +69,52 @@ class _MainPageState extends State<MainPage> {
                       ),
                     );
                   } else if (state is MapDisplayLoadSuccess) {
-                    markers = state.mapDisplay.markers;
-                    return FlutterMap(
-                      mapController: mapController,
-                      options: MapOptions(
-                        maxZoom: 18,
-                        center: state.mapDisplay.centerLocation,
-                        zoom: 16,
-                      ),
-                      layers: [
-                        TileLayerOptions(
-                            urlTemplate:
-                                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                            subdomains: ['a', 'b', 'c']),
-                        // PolylineLayerOptions(
-                        //   polylines: [
-                        //     Polyline(
-                        //         points: points, strokeWidth: 4.0, color: Colors.blue),
-                        //   ],
-                        // ),
-                        MarkerLayerOptions(markers: markers)
-                      ],
+                    markers = state.mapDisplay.markers!;
+                    return BlocConsumer<RouteBloc, RouteState>(
+                      listener: (context, routeState) async {
+                        if (routeState is RouteSuccess) {
+                          print("getting in listener");
+
+                          setState(() {
+                            routeShown = true;
+                            mode = routeState.mapDisplay.mode;
+                          });
+
+                          var location = Location();
+                          var currentLocation = await location.getLocation();
+                          mapController.move(
+                            LatLng(currentLocation.latitude!,
+                                currentLocation.longitude!),
+                            18,
+                          );
+                        }
+                      },
+                      builder: (context, routeState) {
+                        return FlutterMap(
+                          mapController: mapController,
+                          options: MapOptions(
+                            maxZoom: 18,
+                            center: state.mapDisplay.centerLocation,
+                            zoom: 16,
+                          ),
+                          layers: [
+                            TileLayerOptions(
+                                urlTemplate:
+                                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                subdomains: ['a', 'b', 'c']),
+                            MarkerLayerOptions(markers: markers),
+                            (routeState is RouteSuccess)
+                                ? PolylineLayerOptions(polylines: [
+                                    Polyline(
+                                        points:
+                                            routeState.mapDisplay.bestRoute!,
+                                        strokeWidth: 8.0,
+                                        color: Colors.red),
+                                  ])
+                                : PolylineLayerOptions(polylines: [])
+                          ],
+                        );
+                      },
                     );
                   }
                   return Container();
@@ -88,30 +128,109 @@ class _MainPageState extends State<MainPage> {
                 left: 15,
                 child: Column(
                   children: [
-                    SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: FloatingActionButton(
-                        child: const Icon(Icons.directions_walk),
-                        onPressed: () {},
+                    ClipRRect(
+                      child: Container(
+                        decoration: routeShown && mode == "walking"
+                            ? BoxDecoration(
+                                border: Border.all(color: Colors.blueAccent))
+                            : const BoxDecoration(),
+                        width: 40,
+                        height: 40,
+                        child: FloatingActionButton(
+                          child: const Icon(Icons.directions_walk),
+                          onPressed: routeShown && mode == "walking"
+                              ? null
+                              : () async {
+                                  // implementation
+                                  if (super.widget.destinationPlace != null) {
+                                    var location = Location();
+                                    var currentLocation =
+                                        await location.getLocation();
+                                    BlocProvider.of<RouteBloc>(context).add(
+                                        ShowRoute(
+                                            startLocation:
+                                                LatLng(currentLocation.latitude!,
+                                                    currentLocation.longitude!),
+                                            destination:
+                                                super.widget.destinationPlace!,
+                                            mode: "walking"));
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          content: const Text(
+                                              "Please set the destination address first."),
+                                          actions: [
+                                            ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text("ok")),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  }
+                                },
+                        ),
                       ),
                     ),
                     const SizedBox(
                       height: 10,
                     ),
-                    SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: FloatingActionButton(
-                        child: const Icon(Icons.directions_car),
-                        onPressed: () {},
+                    ClipRRect(
+                      child: Container(
+                        decoration: routeShown && mode == "driving"
+                            ? BoxDecoration(
+                                border: Border.all(color: Colors.green))
+                            : const BoxDecoration(),
+                        width: 40,
+                        height: 40,
+                        child: FloatingActionButton(
+                            child: const Icon(Icons.directions_car),
+                            onPressed: routeShown && mode == "driving"
+                                ? null
+                                : () async {
+                                    // implementation
+                                    if (super.widget.destinationPlace != null) {
+                                      var location = Location();
+                                      var currentLocation =
+                                          await location.getLocation();
+                                      BlocProvider.of<RouteBloc>(context).add(
+                                          ShowRoute(
+                                              startLocation: LatLng(
+                                                  currentLocation.latitude!,
+                                                  currentLocation.longitude!),
+                                              destination:
+                                                  super.widget.destinationPlace!,
+                                              mode: "driving"));
+                                    } else {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            content: const Text(
+                                                "Please set the destination address first."),
+                                            actions: [
+                                              ElevatedButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text("ok")),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+                                  }),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // current location and show route===============================
+              // current location and cancel route ===============================
               Positioned(
                 bottom: 15,
                 right: 15,
@@ -122,18 +241,18 @@ class _MainPageState extends State<MainPage> {
                       height: 10,
                     ),
                     (routeShown)
-                    ? SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: FloatingActionButton(
-                        child: const Icon(
-                          Icons.cancel,
-                          color: Colors.red,
-                        ),
-                        onPressed: () {},
-                      ),
-                    )
-                    : const SizedBox(),
+                        ? SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: FloatingActionButton(
+                              child: const Icon(
+                                Icons.cancel,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {},
+                            ),
+                          )
+                        : const SizedBox(),
                   ],
                 ),
               )

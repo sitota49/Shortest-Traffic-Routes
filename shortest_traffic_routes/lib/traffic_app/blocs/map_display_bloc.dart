@@ -33,7 +33,7 @@ class MapDisplayBloc extends Bloc<MapDisplayEvent, MapDisplayState> {
           builder: (ctx) => const Icon(
                 Icons.location_pin,
                 color: Colors.blue,
-                size: 30,
+                size: 45,
               ),
           anchorPos: AnchorPos.align(AnchorAlign.center));
 
