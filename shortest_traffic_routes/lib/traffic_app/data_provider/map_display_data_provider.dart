@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:shortest_traffic_routes/traffic_app/models/mapDisplay.dart';
+import 'package:shortest_traffic_routes/traffic_app/models/map_display.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -20,10 +20,10 @@ class MapDisplayDataProvider {
       } else {
         throw Exception("Error");
       }
-    } on SocketException catch (e) {
-      throw e;
-    } on HttpException catch (e) {
-      throw e;
+    } on SocketException catch (_) {
+      rethrow;
+    } on HttpException catch (_) {
+      rethrow;
     }
   }
 

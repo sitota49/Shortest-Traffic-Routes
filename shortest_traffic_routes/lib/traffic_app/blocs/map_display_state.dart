@@ -1,4 +1,4 @@
-import 'package:shortest_traffic_routes/traffic_app/models/mapDisplay.dart';
+import 'package:shortest_traffic_routes/traffic_app/models/map_display.dart';
 import 'package:equatable/equatable.dart';
 
 class MapDisplayState extends Equatable {

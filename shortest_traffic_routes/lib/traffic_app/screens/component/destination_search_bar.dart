@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:shortest_traffic_routes/traffic_app/blocs/marker_bloc_event_state.dart';
 import 'package:shortest_traffic_routes/traffic_app/blocs/search_bloc/search_bloc.dart';
 import 'package:shortest_traffic_routes/traffic_app/blocs/search_bloc/search_event.dart';
 
 import '../../blocs/search_bloc/serach_state.dart';
 
+// ignore: must_be_immutable
 class DestinationSearchBar extends StatefulWidget {
-  const DestinationSearchBar({Key? key, required this.mapController})
+  DestinationSearchBar({Key? key, required this.mapController})
       : super(key: key);
   final MapController mapController;
+  late LatLng destinationPlace;
 
   @override
   _DestinationSearchBarState createState() =>
@@ -20,6 +24,7 @@ class DestinationSearchBar extends StatefulWidget {
 
 class _DestinationSearchBarState extends State<DestinationSearchBar> {
   final MapController mapController;
+  final floatingBarSearchController = FloatingSearchBarController();
   _DestinationSearchBarState({required this.mapController});
   @override
   Widget build(BuildContext context) {
@@ -32,6 +37,8 @@ class _DestinationSearchBarState extends State<DestinationSearchBar> {
           height: 70,
           progress: (state is QueryProcessing),
           hint: 'Search destination address...',
+          isScrollControlled: true,
+          controller: floatingBarSearchController,
           // scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
           transitionDuration: const Duration(milliseconds: 400),
           transitionCurve: Curves.easeInOut,
@@ -81,11 +88,17 @@ class _DestinationSearchBarState extends State<DestinationSearchBar> {
                       itemCount: state.searchResults.length,
                       itemBuilder: (context, i) {
                         return GestureDetector(
-                          onTap: () => {
+                          onTap: () {
+                            BlocProvider.of<MarkerBloc>(context).add(
+                                MarkerChanged(
+                                    place: state.searchResults[i].latlng));
+                            floatingBarSearchController.close();
                             widget.mapController.move(
                               state.searchResults[i].latlng,
                               18,
-                            )
+                            );
+                            super.widget.destinationPlace =
+                                state.searchResults[i].latlng;
                           },
                           child: ListTile(
                             leading: const Icon(Icons.place),
@@ -98,12 +111,13 @@ class _DestinationSearchBarState extends State<DestinationSearchBar> {
                     ));
               } else {
                 return ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Column(mainAxisSize: MainAxisSize.min, children: const [
-                  Icon(Icons.face),
-                  Text("Sorry we couldn't find anything"),
-                ]),
-              );
+                  borderRadius: BorderRadius.circular(8),
+                  child:
+                      Column(mainAxisSize: MainAxisSize.min, children: const [
+                    Icon(Icons.face),
+                    Text("Sorry we couldn't find anything"),
+                  ]),
+                );
               }
             } else {
               return const SizedBox(

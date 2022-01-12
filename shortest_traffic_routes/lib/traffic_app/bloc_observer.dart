@@ -9,7 +9,6 @@ class SimpleBlocObserver extends BlocObserver {
 
   @override
   onTransition(Bloc bloc, Transition transition) {
-    print('onTransition $transition');
     super.onTransition(bloc, transition);
   }
 

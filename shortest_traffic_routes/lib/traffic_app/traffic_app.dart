@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shortest_traffic_routes/traffic_app/blocs/marker_bloc_event_state.dart';
 import 'package:shortest_traffic_routes/traffic_app/blocs/search_bloc/search_bloc.dart';
 import 'package:shortest_traffic_routes/traffic_app/data_provider/place_data_provider.dart';
 import 'package:shortest_traffic_routes/traffic_app/repository/map_display_repository.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
                       const MapDisplayLoad(),
                     )),
           BlocProvider(create: (context) => SearchBloc(placeRepository: placeRepository)),
+          BlocProvider(create: (context) => MarkerBloc()),
         ],
         child: MaterialApp(
           title: 'Flutter Demo',

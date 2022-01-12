@@ -41,6 +41,6 @@ class MapDisplay extends Equatable {
         startLocation: json['startLocation'],
         destinationLocation: json['destinationLocation'],
         bestRoute: json['bestRoute'],
-        markers: []);
+        markers: const[]);
   }
 }
