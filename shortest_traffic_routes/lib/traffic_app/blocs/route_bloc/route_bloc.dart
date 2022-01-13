@@ -13,11 +13,13 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
   Future<void> _showRoute(ShowRoute event, Emitter<RouteState> emit) async {
     emit(RouteLoading());
     try {
-      var mapDisplay = await routeRepository.showRoute(event.startLocation, event.destination, event.mode);
+      var mapDisplay = await routeRepository.showRoute(
+          event.startLocation, event.destination, event.mode);
       emit(RouteSuccess(mapDisplay: mapDisplay));
     } catch (e) {
-      emit(const RouteFailure(
-          message: "Network error please try again."));
+      // emit(const RouteFailure(
+      //     message: "Network error please try again."));
+      emit(RouteFailure(message: e.toString()));
     }
   }
 }

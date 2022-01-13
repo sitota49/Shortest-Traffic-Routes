@@ -121,17 +121,67 @@ class _MainPageState extends State<MainPage> {
                 left: 15,
                 child: Column(
                   children: [
-                    ClipRRect(
-                      child: Container(
-                        decoration: routeShown && mode == "walking"
-                            ? BoxDecoration(
-                                border: Border.all(color: Colors.blueAccent))
-                            : const BoxDecoration(),
-                        width: 40,
-                        height: 40,
-                        child: FloatingActionButton(
-                          child: const Icon(Icons.directions_walk),
-                          onPressed: routeShown && mode == "walking"
+                    Container(
+                      decoration: routeShown && mode == "walking"
+                          ? BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.red, width: 2.5))
+                          : const BoxDecoration(),
+                      width: 40,
+                      height: 40,
+                      child: FloatingActionButton(
+                        child: const Icon(Icons.directions_walk),
+                        onPressed: routeShown && mode == "walking"
+                            ? null
+                            : () async {
+                                // implementation
+                                if (super.widget.destinationPlace != null) {
+                                  var location = Location();
+                                  var currentLocation =
+                                      await location.getLocation();
+                                  BlocProvider.of<RouteBloc>(context).add(
+                                      ShowRoute(
+                                          startLocation:
+                                              LatLng(currentLocation.latitude!,
+                                                  currentLocation.longitude!),
+                                          destination:
+                                              super.widget.destinationPlace!,
+                                          mode: "walking"));
+                                } else {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        content: const Text(
+                                            "Please set the destination address first."),
+                                        actions: [
+                                          ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text("ok")),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      decoration: routeShown && mode == "driving"
+                          ? BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.red, width: 2.5))
+                          : const BoxDecoration(),
+                      width: 40,
+                      height: 40,
+                      child: FloatingActionButton(
+                          child: const Icon(Icons.directions_car),
+                          onPressed: routeShown && mode == "driving"
                               ? null
                               : () async {
                                   // implementation
@@ -146,7 +196,7 @@ class _MainPageState extends State<MainPage> {
                                                 currentLocation.longitude!),
                                             destination:
                                                 super.widget.destinationPlace!,
-                                            mode: "walking"));
+                                            mode: "driving"));
                                   } else {
                                     showDialog(
                                       context: context,
@@ -165,60 +215,7 @@ class _MainPageState extends State<MainPage> {
                                       },
                                     );
                                   }
-                                },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    ClipRRect(
-                      child: Container(
-                        decoration: routeShown && mode == "driving"
-                            ? BoxDecoration(
-                                border: Border.all(color: Colors.green))
-                            : const BoxDecoration(),
-                        width: 40,
-                        height: 40,
-                        child: FloatingActionButton(
-                            child: const Icon(Icons.directions_car),
-                            onPressed: routeShown && mode == "driving"
-                                ? null
-                                : () async {
-                                    // implementation
-                                    if (super.widget.destinationPlace != null) {
-                                      var location = Location();
-                                      var currentLocation =
-                                          await location.getLocation();
-                                      BlocProvider.of<RouteBloc>(context).add(
-                                          ShowRoute(
-                                              startLocation: LatLng(
-                                                  currentLocation.latitude!,
-                                                  currentLocation.longitude!),
-                                              destination: super
-                                                  .widget
-                                                  .destinationPlace!,
-                                              mode: "driving"));
-                                    } else {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            content: const Text(
-                                                "Please set the destination address first."),
-                                            actions: [
-                                              ElevatedButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: const Text("ok")),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    }
-                                  }),
-                      ),
+                                }),
                     ),
                   ],
                 ),
@@ -254,17 +251,10 @@ class _MainPageState extends State<MainPage> {
               ),
 
               // error or loading route setup======================================
-              Positioned.fill(
-                child: BlocBuilder<RouteBloc, RouteState>(
-                  builder: (context, state) {
-                    if (state is RouteLoading) {
-                      return Container(
-                         color: const Color.fromARGB(40, 0, 0, 0),
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: const Center(child: CircularProgressIndicator()),
-                      );
-                    } else if (state is RouteFailure) {
+              Positioned(
+                child: BlocListener<RouteBloc, RouteState>(
+                  listener: (context, state) {
+                    if (state is RouteFailure) {
                       showDialog(
                           context: context,
                           builder: (BuildContext context) {
@@ -277,28 +267,25 @@ class _MainPageState extends State<MainPage> {
                                   },
                                   child: const Text("cancel"),
                                 ),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    var location = Location();
-                                    var currentLocation =
-                                        await location.getLocation();
-                                    BlocProvider.of<RouteBloc>(context).add(
-                                        ShowRoute(
-                                            startLocation: LatLng(
-                                                currentLocation.latitude!,
-                                                currentLocation.longitude!),
-                                            destination:
-                                                super.widget.destinationPlace!,
-                                            mode: "walking"));
-                                  },
-                                  child: const Text("Try again"),
-                                ),
                               ],
                             );
                           });
                     }
-                    return const SizedBox();
                   },
+                  child: BlocBuilder<RouteBloc, RouteState>(
+                    builder: (context, routeState) {
+                      if (routeState is RouteLoading) {
+                        return Container(
+                          color: const Color.fromARGB(40, 0, 0, 0),
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          child:
+                              const Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      return const SizedBox();
+                    },
+                  ),
                 ),
               ),
             ],
