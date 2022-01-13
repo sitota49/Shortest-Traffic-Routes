@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shortest_traffic_routes/traffic_app/models/map_display.dart';
-import 'package:shortest_traffic_routes/traffic_app/models/place.dart';
 import 'package:latlong2/latlong.dart';
 
 class RouteDataProvider {

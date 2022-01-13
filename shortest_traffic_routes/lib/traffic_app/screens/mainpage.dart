@@ -48,13 +48,8 @@ class _MainPageState extends State<MainPage> {
             }
           },
           child: Stack(
+            alignment: Alignment.center,
             children: <Widget>[
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(),
-                ),
-              ),
               BlocBuilder<MapDisplayBloc, MapDisplayState>(
                 builder: (context, state) {
                   if (state is MapDisplayLoading) {
@@ -73,8 +68,6 @@ class _MainPageState extends State<MainPage> {
                     return BlocConsumer<RouteBloc, RouteState>(
                       listener: (context, routeState) async {
                         if (routeState is RouteSuccess) {
-                          print("getting in listener");
-
                           setState(() {
                             routeShown = true;
                             mode = routeState.mapDisplay.mode;
@@ -148,9 +141,9 @@ class _MainPageState extends State<MainPage> {
                                         await location.getLocation();
                                     BlocProvider.of<RouteBloc>(context).add(
                                         ShowRoute(
-                                            startLocation:
-                                                LatLng(currentLocation.latitude!,
-                                                    currentLocation.longitude!),
+                                            startLocation: LatLng(
+                                                currentLocation.latitude!,
+                                                currentLocation.longitude!),
                                             destination:
                                                 super.widget.destinationPlace!,
                                             mode: "walking"));
@@ -202,8 +195,9 @@ class _MainPageState extends State<MainPage> {
                                               startLocation: LatLng(
                                                   currentLocation.latitude!,
                                                   currentLocation.longitude!),
-                                              destination:
-                                                  super.widget.destinationPlace!,
+                                              destination: super
+                                                  .widget
+                                                  .destinationPlace!,
                                               mode: "driving"));
                                     } else {
                                       showDialog(
@@ -240,22 +234,73 @@ class _MainPageState extends State<MainPage> {
                     const SizedBox(
                       height: 10,
                     ),
-                    (routeShown)
-                        ? SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: FloatingActionButton(
-                              child: const Icon(
-                                Icons.cancel,
-                                color: Colors.red,
-                              ),
-                              onPressed: () {},
-                            ),
-                          )
-                        : const SizedBox(),
+                    // cancel route icon ============================
+
+                    // (routeShown)
+                    //     ? SizedBox(
+                    //         width: 40,
+                    //         height: 40,
+                    //         child: FloatingActionButton(
+                    //           child: const Icon(
+                    //             Icons.cancel,
+                    //             color: Colors.red,
+                    //           ),
+                    //           onPressed: () {},
+                    //         ),
+                    //       )
+                    //     : const SizedBox(),
                   ],
                 ),
-              )
+              ),
+
+              // error or loading route setup======================================
+              Positioned.fill(
+                child: BlocBuilder<RouteBloc, RouteState>(
+                  builder: (context, state) {
+                    if (state is RouteLoading) {
+                      return Container(
+                         color: const Color.fromARGB(40, 0, 0, 0),
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: const Center(child: CircularProgressIndicator()),
+                      );
+                    } else if (state is RouteFailure) {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              content: Text(state.message),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("cancel"),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    var location = Location();
+                                    var currentLocation =
+                                        await location.getLocation();
+                                    BlocProvider.of<RouteBloc>(context).add(
+                                        ShowRoute(
+                                            startLocation: LatLng(
+                                                currentLocation.latitude!,
+                                                currentLocation.longitude!),
+                                            destination:
+                                                super.widget.destinationPlace!,
+                                            mode: "walking"));
+                                  },
+                                  child: const Text("Try again"),
+                                ),
+                              ],
+                            );
+                          });
+                    }
+                    return const SizedBox();
+                  },
+                ),
+              ),
             ],
           ),
         ),

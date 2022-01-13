@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:shortest_traffic_routes/traffic_app/blocs/marker_bloc_event_state.dart';
 import 'package:shortest_traffic_routes/traffic_app/blocs/search_bloc/search_bloc.dart';

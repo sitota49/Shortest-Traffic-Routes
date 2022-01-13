@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:shortest_traffic_routes/traffic_app/models/map_display.dart';
 
 class RouteState extends Equatable {
