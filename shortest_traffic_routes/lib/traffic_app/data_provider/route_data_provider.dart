@@ -6,7 +6,7 @@ import 'package:latlong2/latlong.dart';
 class RouteDataProvider {
   final http.Client httpClient;
   // final _baseurl = 'photon.komoot.io/api/?q=';
-  final _baseUrl = '192.168.0.8:8000';
+  final _baseUrl = '192.168.0.6:8000';
   RouteDataProvider({required this.httpClient});
 
   Future<MapDisplay> showRoute(
@@ -17,9 +17,9 @@ class RouteDataProvider {
             'Content-Type': 'application/json',
           },
           body: jsonEncode(<String, dynamic>{
-            "startLocation": [9.0377861, 38.7626389],
-            "destination": [9.0355672, 38.7522876],
-            'mode': "walking",
+            "startLocation": [startLocation.latitude, startLocation.longitude],
+            "destination": [destination.latitude, destination.longitude],
+            'mode': mode,
           }));
 
       if (response.statusCode == 200) {
@@ -28,7 +28,7 @@ class RouteDataProvider {
             List<LatLng>.from(points.map((e) => LatLng(e[0], e[1])));
         return MapDisplay(mode: mode, bestRoute: newPoints);
       } else {
-        throw Exception("Error");
+        throw Exception("Network error. please try again.");
       }
     } catch (e) {
       throw Exception(e.toString());

@@ -122,7 +122,7 @@ class _MainPageState extends State<MainPage> {
                 child: Column(
                   children: [
                     Container(
-                      decoration: routeShown && mode == "walking"
+                      decoration: routeShown
                           ? BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: Colors.red, width: 2.5))
@@ -130,10 +130,8 @@ class _MainPageState extends State<MainPage> {
                       width: 40,
                       height: 40,
                       child: FloatingActionButton(
-                        child: const Icon(Icons.directions_walk),
-                        onPressed: routeShown && mode == "walking"
-                            ? null
-                            : () async {
+                        child: const Icon(Icons.directions),
+                        onPressed: () async {
                                 // implementation
                                 if (super.widget.destinationPlace != null) {
                                   var location = Location();
@@ -170,52 +168,6 @@ class _MainPageState extends State<MainPage> {
                     ),
                     const SizedBox(
                       height: 10,
-                    ),
-                    Container(
-                      decoration: routeShown && mode == "driving"
-                          ? BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.red, width: 2.5))
-                          : const BoxDecoration(),
-                      width: 40,
-                      height: 40,
-                      child: FloatingActionButton(
-                          child: const Icon(Icons.directions_car),
-                          onPressed: routeShown && mode == "driving"
-                              ? null
-                              : () async {
-                                  // implementation
-                                  if (super.widget.destinationPlace != null) {
-                                    var location = Location();
-                                    var currentLocation =
-                                        await location.getLocation();
-                                    BlocProvider.of<RouteBloc>(context).add(
-                                        ShowRoute(
-                                            startLocation: LatLng(
-                                                currentLocation.latitude!,
-                                                currentLocation.longitude!),
-                                            destination:
-                                                super.widget.destinationPlace!,
-                                            mode: "driving"));
-                                  } else {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          content: const Text(
-                                              "Please set the destination address first."),
-                                          actions: [
-                                            ElevatedButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text("ok")),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  }
-                                }),
                     ),
                   ],
                 ),
